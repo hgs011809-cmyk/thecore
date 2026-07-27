@@ -1,0 +1,32 @@
+<svg width="1024" height="1024" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg">
+  <!-- SecretCall 앱 아이콘: 암호화(자물쇠) + 통화(수화기) -->
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#141b2e"/>
+      <stop offset="1" stop-color="#0e1116"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#5b93ff"/>
+      <stop offset="1" stop-color="#2f6df6"/>
+    </linearGradient>
+  </defs>
+
+  <!-- 배경 -->
+  <rect width="1024" height="1024" rx="224" fill="url(#bg)"/>
+  <rect x="6" y="6" width="1012" height="1012" rx="220" fill="none" stroke="#2a3350" stroke-width="4"/>
+
+  <!-- 수화기(전화) — 표준 'call' 글리프, 24x24 를 확대 -->
+  <g transform="translate(176 210) scale(29)">
+    <path fill="url(#accent)" d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/>
+  </g>
+
+  <!-- 자물쇠(암호화) 배지 -->
+  <g transform="translate(700 300)">
+    <circle cx="0" cy="0" r="128" fill="#0e1116"/>
+    <circle cx="0" cy="0" r="128" fill="none" stroke="url(#accent)" stroke-width="10"/>
+    <rect x="-56" y="-6" width="112" height="90" rx="18" fill="#eaf1ff"/>
+    <path d="M -32 -6 v -26 a 32 32 0 0 1 64 0 v 26" fill="none" stroke="#eaf1ff" stroke-width="18" stroke-linecap="round"/>
+    <circle cx="0" cy="32" r="13" fill="#2f6df6"/>
+    <rect x="-6" y="36" width="12" height="26" rx="6" fill="#2f6df6"/>
+  </g>
+</svg>

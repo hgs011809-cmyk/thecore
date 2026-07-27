@@ -1,0 +1,17 @@
+# TURN 서버(coturn) 배포용 docker-compose.
+# 사용법 (리눅스 VPS):
+#   1) coturn/turnserver.conf 의 static-auth-secret / external-ip / realm 을 채움
+#      (static-auth-secret 은 서버 .env 의 TURN_STATIC_SECRET 과 동일해야 함)
+#   2) docker compose up -d
+#   3) 방화벽에서 3478/tcp+udp, 5349/tcp+udp, 49152-65535/udp 개방
+#
+# 참고: TURN 릴레이는 넓은 UDP 포트 범위를 쓰므로 리눅스에서는 host 네트워크가 가장 안정적입니다.
+services:
+  coturn:
+    image: coturn/coturn:4.6
+    container_name: secretcall-coturn
+    restart: unless-stopped
+    network_mode: host
+    volumes:
+      - ./coturn/turnserver.conf:/etc/coturn/turnserver.conf:ro
+    command: ["-c", "/etc/coturn/turnserver.conf"]

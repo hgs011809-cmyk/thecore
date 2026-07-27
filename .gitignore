@@ -1,0 +1,38 @@
+# 의존성
+node_modules/
+
+# 환경변수 / 비밀 (절대 커밋 금지)
+.env
+.env.*
+!.env.example
+**/secrets/
+*.p8
+*.keystore
+*.jks
+google-services.json
+GoogleService-Info.plist
+
+# 서버 데이터(가입자 저장소 — 커밋 금지)
+server/data/
+**/data/*.db
+**/data/*.json
+
+# React Native 생성 네이티브 프로젝트(용량 큼, 각자 생성)
+mobile/android/
+mobile/ios/
+
+# 빌드 산출물
+**/build/
+**/dist/
+*.apk
+*.aab
+
+# 로그 / 임시
+*.log
+.DS_Store
+Thumbs.db
+
+# 에디터 / 도구
+.vscode/
+.idea/
+.claude/

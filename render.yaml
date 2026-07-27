@@ -1,0 +1,29 @@
+# Render 배포 청사진(Blueprint). 저장소를 Render 에 연결하면 이 설정으로 자동 배포됩니다.
+# 대시보드에서 New + → Blueprint → 이 저장소 선택.
+services:
+  - type: web
+    name: secretcall-signaling
+    env: node
+    plan: free
+    rootDir: server
+    buildCommand: npm install
+    startCommand: node src/server.js
+    healthCheckPath: /api/health
+    envVars:
+      # 관리자 키: Render 가 자동으로 강력한 값 생성
+      - key: ADMIN_KEY
+        generateValue: true
+      # 테스트 계정(아이디:등록코드). 재배포/재시작해도 항상 존재.
+      # 앱에서 이 아이디+코드로 가입하세요. 실제 운영 전 반드시 변경/삭제!
+      - key: SEED_USERS
+        value: phoneA:111111,phoneB:222222
+      # STUN
+      - key: STUN_URLS
+        value: stun:stun.l.google.com:19302
+      # 무료 공개 TURN(OpenRelay) — 값이 바뀔 수 있으니 접속 안 되면 최신값 확인
+      - key: TURN_URLS
+        value: turn:openrelay.metered.ca:80,turn:openrelay.metered.ca:443
+      - key: TURN_USERNAME
+        value: openrelayproject
+      - key: TURN_CREDENTIAL
+        value: openrelayproject
