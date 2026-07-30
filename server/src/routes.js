@@ -36,10 +36,14 @@ router.post('/register', (req, res) => {
   if (user.status === 'disabled') {
     return res.status(403).json({ error: '사용 중지된 아이디입니다.' });
   }
-  if (user.status === 'registered') {
+  // 테스트용 시드 계정은 코드만 맞으면 언제든 재가입(재로그인) 허용.
+  // 일반 계정은 최초 1회만 가입 가능(등록코드 소진).
+  const seed = config.seedUsers.find((s) => s.user_id === user_id);
+  if (!seed && user.status === 'registered') {
     return res.status(409).json({ error: '이미 가입된 아이디입니다. 재발급이 필요하면 관리자에게 문의하세요.' });
   }
-  if (user.registration_code !== registration_code) {
+  const expectedCode = seed ? seed.registration_code : user.registration_code;
+  if (expectedCode !== registration_code) {
     return res.status(401).json({ error: '등록코드가 올바르지 않습니다.' });
   }
   if (typeof identity_public_key !== 'string' || identity_public_key.length > 512) {
