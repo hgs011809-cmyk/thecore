@@ -16,7 +16,7 @@ services:
       # 테스트 계정(아이디:등록코드). 재배포/재시작해도 항상 존재.
       # 앱에서 이 아이디+코드로 가입하세요. 실제 운영 전 반드시 변경/삭제!
       - key: SEED_USERS
-        value: phoneA:111111,phoneB:222222
+        value: phoneA:111111,phoneB:222222,phoneC:333333,phoneD:444444,phoneE:555555
       # STUN
       - key: STUN_URLS
         value: stun:stun.l.google.com:19302
