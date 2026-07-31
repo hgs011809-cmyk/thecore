@@ -39,12 +39,22 @@ export const q = {
         user_id,
         registration_code,
         identity_public_key: null,
+        encryption_public_key: null, // 메시지 암호화용 공개키(Curve25519)
         auth_token_hash: null,
         status: 'issued',
         created_at,
         registered_at: null,
         push: { fcm: null, apnsVoip: null }, // 수신 알림용 기기 토큰
       };
+      persist();
+    },
+  },
+
+  setEncKey: {
+    run({ user_id, enc_public_key }) {
+      const u = state.users[user_id];
+      if (!u) return;
+      u.encryption_public_key = enc_public_key;
       persist();
     },
   },

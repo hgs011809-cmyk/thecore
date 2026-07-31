@@ -64,6 +64,30 @@ export function attachSignaling(server) {
     return !!(u && u.push && (u.push.fcm || u.push.apnsVoip));
   }
 
+  // ── E2EE 메시지 오프라인 큐 (암호문만 잠깐 보관, 전달 후 삭제) ──
+  // 서버는 내용을 못 읽는다. 메모리 큐라 서버 재시작 시 미전달분은 사라진다(무료 서버 한계).
+  const MSG_TTL_MS = 3 * 24 * 60 * 60 * 1000; // 3일
+  const MSG_QUEUE_MAX = 500; // 사용자당 최대 큐
+  /** @type {Map<string, Array<{payload: object, exp: number}>>} */
+  const msgQueue = new Map();
+
+  function enqueueMessage(to, payload) {
+    const arr = msgQueue.get(to) || [];
+    arr.push({ payload, exp: Date.now() + MSG_TTL_MS });
+    while (arr.length > MSG_QUEUE_MAX) arr.shift(); // 오래된 것부터 버림
+    msgQueue.set(to, arr);
+  }
+
+  function flushMessages(userId, ws) {
+    const arr = msgQueue.get(userId);
+    if (!arr || arr.length === 0) return;
+    msgQueue.delete(userId);
+    const now = Date.now();
+    for (const item of arr) {
+      if (item.exp > now) send(ws, item.payload);
+    }
+  }
+
   wss.on('connection', (ws) => {
     ws.isAlive = true;
     ws.userId = null;
@@ -95,8 +119,9 @@ export function attachSignaling(server) {
         ws.userId = user.user_id;
         online.set(user.user_id, ws);
         send(ws, { type: 'auth-ok', user_id: user.user_id });
-        // 깨어난 직후 대기 중인 통화가 있으면 바로 전달
+        // 깨어난 직후 대기 중인 통화·메시지가 있으면 바로 전달
         flushPending(user.user_id, ws);
+        flushMessages(user.user_id, ws);
         return;
       }
 
@@ -137,6 +162,32 @@ export function attachSignaling(server) {
           clearPending(to); // 발신자가 취소하면 대기 중 offer 제거
         }
         return send(ws, { type: 'peer-offline', to });
+      }
+
+      // 3) E2EE 메시지 전송 (서버는 암호문만 중계/보관)
+      if (msg.type === 'msg-send') {
+        const to = msg.to;
+        if (typeof to !== 'string' || !to) {
+          return send(ws, { type: 'error', error: 'to 필드 필요' });
+        }
+        if (typeof msg.ciphertext !== 'string' || typeof msg.nonce !== 'string') {
+          return send(ws, { type: 'error', error: 'ciphertext/nonce 필요' });
+        }
+        const payload = {
+          type: 'msg',
+          from: ws.userId, // 발신자 서버 확정
+          ciphertext: msg.ciphertext,
+          nonce: msg.nonce,
+          msg_id: msg.msg_id,
+          ts: Date.now(),
+        };
+        const target = online.get(to);
+        if (target) {
+          send(target, payload);
+          return send(ws, { type: 'msg-status', msg_id: msg.msg_id, status: 'delivered' });
+        }
+        enqueueMessage(to, payload);
+        return send(ws, { type: 'msg-status', msg_id: msg.msg_id, status: 'queued' });
       }
 
       send(ws, { type: 'error', error: `알 수 없는 타입: ${msg.type}` });

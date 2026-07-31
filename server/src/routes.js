@@ -79,6 +79,26 @@ router.get('/ice', requireAuth, (req, res) => {
   res.json({ ice_servers: buildIceServers(req.user.user_id) });
 });
 
+// 메시지 암호화용 공개키 등록/갱신 (앱이 최초/변경 시 올림)
+router.post('/enc-key', requireAuth, (req, res) => {
+  const { enc_public_key } = req.body || {};
+  if (typeof enc_public_key !== 'string' || !enc_public_key || enc_public_key.length > 512) {
+    return res.status(400).json({ error: 'enc_public_key 가 올바르지 않습니다.' });
+  }
+  q.setEncKey.run({ user_id: req.user.user_id, enc_public_key });
+  res.json({ ok: true });
+});
+
+// 상대의 메시지 암호화 공개키 조회 (메시지 암호화용)
+router.get('/users/:id/enckey', requireAuth, (req, res) => {
+  const u = q.getUser.get(req.params.id);
+  if (!u) return res.status(404).json({ error: '없는 아이디' });
+  if (!u.encryption_public_key) {
+    return res.status(409).json({ error: '상대가 아직 메시지 키를 등록하지 않았습니다.' });
+  }
+  res.json({ user_id: u.user_id, enc_public_key: u.encryption_public_key });
+});
+
 // 수신 알림용 기기 푸시 토큰 등록/갱신
 router.post('/push-token', requireAuth, (req, res) => {
   const { platform, token } = req.body || {};
